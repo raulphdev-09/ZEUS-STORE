@@ -32,3 +32,16 @@ $('#open-cart').addEventListener('click',()=>{renderCart();$('#cart-dialog').sho
 $('#cart-dialog').addEventListener('click',e=>{const remove=e.target.closest('[data-remove]'),q=e.target.closest('[data-quantity]');if(remove){cart.splice(Number(remove.dataset.remove),1);persist();renderCart();}if(q){const i=Number(q.dataset.quantity);cart[i].qty=Math.min(10,cart[i].qty+Number(q.dataset.delta));if(cart[i].qty<=0)cart.splice(i,1);persist();renderCart();}if(e.target.closest('#continue-shopping')){$('#cart-dialog').close();$('#catalog').scrollIntoView();}if(e.target.closest('#checkout')&&cart.length){$('#cart-dialog').close();$('#checkout-total').innerHTML=`<div class="totals"><strong>Total demonstrativo</strong><strong>${money(totals().total)}</strong></div>`;$('#checkout-dialog').showModal();}});
 $('#checkout-form').addEventListener('submit',e=>{e.preventDefault();if(!cart.length)return;const order='ZS-'+Date.now().toString(36).toUpperCase();cart=[];persist();$('#checkout-form').reset();$('#checkout-dialog').close();$('#cart-items').innerHTML=`<div class="success"><div class="eyebrow">PEDIDO DEMONSTRATIVO CONCLUÍDO</div><h2>Seu estilo, sua essência.</h2><p>Pedido de exemplo <strong>${order}</strong> criado com sucesso.</p><p>Nenhuma cobrança foi feita. Este MVP não envia produtos nem e-mails e não armazena seus dados de checkout.</p><button class="button" id="continue-shopping">Continuar explorando ↗</button></div>`;$('#cart-summary').innerHTML='';$('#cart-dialog').showModal();});
 persist();renderProducts();
+
+// Featured collection: preview an item, then use the existing size selection flow.
+let heroProduct=5;
+document.querySelectorAll('[data-hero]').forEach(button=>button.addEventListener('click',()=>{
+ heroProduct=Number(button.dataset.hero);
+ const product=products.find(p=>p.id===heroProduct);
+ $('#hero-piece').src=`assets/piece-${product.id-1}.svg`;
+ $('#hero-piece').alt=`${product.name} em destaque`;
+ $('#hero-price').textContent=money(product.price);
+ $('#hero-name').textContent=product.name.toUpperCase();
+ document.querySelectorAll('[data-hero]').forEach(b=>{const active=Number(b.dataset.hero)===heroProduct;b.classList.toggle('chosen',active);b.setAttribute('aria-pressed',String(active));});
+}));
+$('#hero-buy').addEventListener('click',()=>openProduct(heroProduct));
